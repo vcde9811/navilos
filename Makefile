@@ -11,6 +11,8 @@ LINKER_SCRIPT = ./navilos.ld
 ASM_SRCS = $(wildcard boot/*.S)
 ASM_OBJS = $(patsubst boot/%.S, build/%.o, $(ASM_SRCS))
 
+INC_DIRS = include
+
 navilos = build/navilos.axf
 navilos_bin = build/navilos.bin
 
@@ -28,7 +30,7 @@ debug: $(navilos)
 	qemu-system-arm -M realview-pb-a8 -kernel $(navilos) -S -gdb tcp::1234,ipv4
 
 gdb:
-	gdb-multiarch $(navilos)
+	arm-none-eabi-gdb
 
 $(navilos): $(ASM_OBJS) $(LINKER_SCRIPT)
 	$(LD) -n -T $(LINKER_SCRIPT) -o $(navilos) $(ASM_OBJS)
@@ -36,4 +38,4 @@ $(navilos): $(ASM_OBJS) $(LINKER_SCRIPT)
 
 build/%.o: boot/%.S
 	mkdir -p $(shell dirname $@)
-	$(AS) -march=$(ARCH) -mcpu=$(MCPU) -g -o $@ $<
+	$(CC) -march=$(ARCH) -mcpu=$(MCPU) -I $(INC_DIRS) -c -g -o $@ $<
